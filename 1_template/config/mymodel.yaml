@@ -8,12 +8,12 @@ train:
   batch_size: 4
   num_workers: 4
   valid_size: 0.3
-  train_path: "./dataset/medium_sample/train"
+  train_path: "/home/ubuntu/kdj/pytorch_basic/2_data/train"
 
 test:
   batch_size: 4
   num_workers: 4
-  test_path: "./dataset/medium_sample/test"
+  test_path: "/home/ubuntu/kdj/pytorch_basic/2_data/val"
 
 model:
   base_model: "my_model_class_1"

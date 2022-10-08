@@ -9,11 +9,17 @@ import yaml
 
 from train.trainer import Trainer
 from utils.dataloader import MyTrainSetWrapper
+import os
+
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config/")  # use relative directory path
+
 
 def main(model_name):
     # yaml 로드
-    config = yaml.load(open("./config/" + str(model_name) + ".yaml", "r"), Loader=yaml.FullLoader)
-    trainset = MyTrainSetWrapper(**config['train'])
+    config = yaml.load(
+        open(f"{CONFIG_PATH}" + str(model_name) + ".yaml", "r"), Loader=yaml.FullLoader
+    )
+    trainset = MyTrainSetWrapper(**config["train"])
 
     # Trainer 클래스 초기화. train 실행.
     downstream = Trainer(trainset, model_name, config)

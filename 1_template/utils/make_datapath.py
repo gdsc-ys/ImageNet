@@ -7,10 +7,13 @@
 
 import os
 
+
 def _make_dir(dir):
     if not os.path.exists(dir):
         os.makedirs(dir)
 
+
+#
 def make_abspath_txt(root_folder, save_dir):
     root_path = os.path.abspath(root_folder)
     class_list = os.listdir(root_path)
@@ -28,12 +31,13 @@ def make_abspath_txt(root_folder, save_dir):
         _make_dir(save_dir)
 
         save_path = os.path.join(save_dir, class_name)
-        with open(save_path + '.txt', 'w') as f:
+        with open(save_path + ".txt", "w") as f:
             for item in file_path_list:
                 f.write("%s\n" % item)
         print("Data paths in class {} listed in {}".format(class_name, save_path))
         file_path_list.clear()
 
+
 if __name__ == "__main__":
-    make_abspath_txt("/your/data/path", "../dataset/medium_sample/train")
-    make_abspath_txt("/your/data/path", "../dataset/medium_sample/test")
+    make_abspath_txt("./2_data/imagenette2-320/train", "./2_data/train")
+    make_abspath_txt("./2_data/imagenette2-320/val", "./2_data/val")

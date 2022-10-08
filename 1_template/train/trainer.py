@@ -26,6 +26,10 @@ print("#                   -Promedius Inc.-    #")
 print("#                                       #")
 print("#########################################")
 
+CONFIG_PATH = os.path.join(
+    os.path.dirname(__file__), "..", "config/"
+)  # use relative directory path
+
 # 그래프가 학습이 진행됨에 따라 어느정도 고정이 되면, 학습 속도를 빠르게 진행하기 위한 옵션.
 cudnn.benchmark = True
 
@@ -33,17 +37,22 @@ cudnn.benchmark = True
 def _save_config_file(model_checkpoints_folder, model_name):
     if not os.path.exists(model_checkpoints_folder):
         os.makedirs(model_checkpoints_folder)
-    shutil.copy('./config/' + model_name + '.yaml', os.path.join(model_checkpoints_folder, model_name + '.yaml'))
+    shutil.copy(
+        f"{CONFIG_PATH}" + model_name + ".yaml",
+        os.path.join(model_checkpoints_folder, model_name + ".yaml"),
+    )
+
 
 # 최초, 또는 가장 최근 학습된 가중치와 yaml 파일은 일단 ./weight/checkpoint 폴더에 저장됨.
 # 이후에 이뤄지는 실험은 이전보다 최신이므로, 전에 저장된 checkpoint 이하 파일들은 ./weight/exeperiments 이하로 timestamp 와 함께 copy 됨.
 def _copy_to_experiment_dir(model_checkpoints_folder, model_name):
-    now_time = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
-    new_exp_dir = os.path.join('./weights/experiments', model_name + '_checkpoints', now_time)
+    now_time = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+    new_exp_dir = os.path.join("./weights/experiments", model_name + "_checkpoints", now_time)
     if not os.path.exists(new_exp_dir):
         os.makedirs(new_exp_dir)
     for src in os.listdir(model_checkpoints_folder):
         shutil.copy(os.path.join(model_checkpoints_folder, src), new_exp_dir)
+
 
 # train loop 에 해당하는 클래스
 # multi-gpu 구현되지 않음. (나중에 추가 예정)
@@ -61,7 +70,9 @@ class Trainer(object):
 
     # cuda / cpu 선택
     def _get_device(self):
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        device = (
+            "cuda:0" if torch.cuda.is_available() else "cpu"
+        )  # cuda -> cuda:0 로 바꿈 {cuda:0, cuda:1, cuda:2}
         print("Running on:", device)
         return device
 
@@ -99,26 +110,30 @@ class Trainer(object):
                 total += labels.size(0)
                 correct += predicted.eq(labels).sum().item()
 
-                utils.progress_bar(i, len(valid_loader), 'Loss: %.4f | Acc: %.4f%% (%d/%d)'
-                                   % (valid_loss / (i + 1), 100. * correct / total, correct, total))
+                utils.progress_bar(
+                    i,
+                    len(valid_loader),
+                    "Loss: %.4f | Acc: %.4f%% (%d/%d)"
+                    % (valid_loss / (i + 1), 100.0 * correct / total, correct, total),
+                )
 
             valid_loss = np.mean(h)
 
         # Save checkpoint.
-        model_checkpoints_folder = os.path.join('./weights', 'checkpoints')
+        model_checkpoints_folder = os.path.join("./weights", "checkpoints")
 
         # 해당 epoch 에서 정확도를 계산.
         # 최초 epoch 의 모델은 반드시 저장. 이후 epoch 부터는 바로 이전까지의 epoch 들에서 나온 acc 들과 비교하여
         # best 일때만 해당 epoch 모델을 저장함.
-        acc = 100. * correct / total
+        acc = 100.0 * correct / total
         if acc > best_acc:
-            print('Saving..')
+            print("Saving..")
             state = {
-                'net': net.state_dict(),
-                'acc': acc,
-                'epoch': epoch,
+                "net": net.state_dict(),
+                "acc": acc,
+                "epoch": epoch,
             }
-            torch.save(state, os.path.join(model_checkpoints_folder, 'model.pth'))
+            torch.save(state, os.path.join(model_checkpoints_folder, "model.pth"))
             best_acc = acc
 
         # 다음 epoch 을 위해 다시 모델을 .train() 모드로 전환함.
@@ -131,14 +146,18 @@ class Trainer(object):
     def _load_pre_trained_weights(self, model):
         best_acc = 0
         start_epoch = 0
-        if self.config['resume'] is not None:
+        if self.config["resume"] is not None:
             try:
-                checkpoints_folder = os.path.join('./weights/experiments', str(self.base_model) + '_checkpoints')
-                checkpoint = torch.load(os.path.join(checkpoints_folder, self.config['resume'],'model.pth'))
-                model.load_state_dict(checkpoint['net'])
-                best_acc = checkpoint['acc']
-                start_epoch = checkpoint['epoch']
-                print('\n==> Resuming from checkpoint..')
+                checkpoints_folder = os.path.join(
+                    "./weights/experiments", str(self.base_model) + "_checkpoints"
+                )
+                checkpoint = torch.load(
+                    os.path.join(checkpoints_folder, self.config["resume"], "model.pth")
+                )
+                model.load_state_dict(checkpoint["net"])
+                best_acc = checkpoint["acc"]
+                start_epoch = checkpoint["epoch"]
+                print("\n==> Resuming from checkpoint..")
             except FileNotFoundError:
                 print("\nPre-trained weights not found. Training from scratch.")
         else:
@@ -152,30 +171,32 @@ class Trainer(object):
         train_loader, test_loader = self.dataset.get_data_loaders()
 
         model = self._get_model()
-        model = model(**self.config['model'])
+        model = model(**self.config["model"])
         model, best_acc, start_epoch = self._load_pre_trained_weights(model)
         model = model.to(self.device)
         model.train()
 
         parameters = filter(lambda p: p.requires_grad, model.parameters())
         parameters = sum([np.prod(p.size()) for p in parameters]) / 1_000_000
-        print('Trainable Parameters: %.3fM\n' % parameters)
+        print("Trainable Parameters: %.3fM\n" % parameters)
 
         criterion = self.loss.to(self.device)
         ## optimizer = optim.Adam(model.parameters(), 3e-4) #, weight_decay=eval(self.config['weight_decay']))
-        optimizer = optim.SGD(model.parameters(), lr=self.config['learning_rate'], momentum=0.9)
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(train_loader), eta_min=0, last_epoch=-1)
+        optimizer = optim.SGD(model.parameters(), lr=self.config["learning_rate"], momentum=0.9)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer, T_max=len(train_loader), eta_min=0, last_epoch=-1
+        )
 
         # save config file
-        model_checkpoints_folder = os.path.join('./weights', 'checkpoints')
+        model_checkpoints_folder = os.path.join("./weights", "checkpoints")
         _save_config_file(model_checkpoints_folder, str(self.base_model))
 
         history = {}
-        history['train_loss'] = []
-        history['valid_loss'] = []
+        history["train_loss"] = []
+        history["valid_loss"] = []
 
-        epochs = self.config['epochs']
-        for e in range(start_epoch, start_epoch+epochs):
+        epochs = self.config["epochs"]
+        for e in range(start_epoch, start_epoch + epochs):
             h = np.array([])
 
             train_loss = 0
@@ -200,25 +221,33 @@ class Trainer(object):
                 total += labels.size(0)
                 correct += predicted.eq(labels).sum().item()
 
-                utils.progress_bar(i, len(train_loader), 'Loss: %.4f | Acc: %.4f%% (%d/%d)'
-                                   % (train_loss / (i + 1), 100. * correct / total, correct, total))
+                utils.progress_bar(
+                    i,
+                    len(train_loader),
+                    "Loss: %.4f | Acc: %.4f%% (%d/%d)"
+                    % (train_loss / (i + 1), 100.0 * correct / total, correct, total),
+                )
 
             train_loss = np.mean(h)
             valid_loss, best_acc = self._validate(e, model, criterion, test_loader, best_acc)
 
-            print('epoch [{}/{}], train_loss:{:.4f}, valid_loss:{:.4f}\n'.format(e + 1, start_epoch+epochs, train_loss, valid_loss))
+            print(
+                "epoch [{}/{}], train_loss:{:.4f}, valid_loss:{:.4f}\n".format(
+                    e + 1, start_epoch + epochs, train_loss, valid_loss
+                )
+            )
 
-            history['train_loss'].append(train_loss)
-            history['valid_loss'].append(valid_loss)
+            history["train_loss"].append(train_loss)
+            history["valid_loss"].append(valid_loss)
 
             plt.figure(figsize=(15, 10))
-            plt.plot(history['train_loss'], linewidth=2.0)
-            plt.plot(history['valid_loss'], linewidth=2.0)
-            plt.title('model loss.')
-            plt.ylabel('loss')
-            plt.xlabel('epoch')
-            plt.legend(['train', 'valid'], loc='upper right')
-            plt.savefig('./weights/checkpoints/loss.png')
+            plt.plot(history["train_loss"], linewidth=2.0)
+            plt.plot(history["valid_loss"], linewidth=2.0)
+            plt.title("model loss.")
+            plt.ylabel("loss")
+            plt.xlabel("epoch")
+            plt.legend(["train", "valid"], loc="upper right")
+            plt.savefig("./weights/checkpoints/loss.png")
             plt.close()
 
         print("--------------")
