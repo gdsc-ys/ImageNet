@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import scikitplot as skplt
 from sklearn.metrics import confusion_matrix
 
-from utils.dataloader import MyTestSetWrapper
+from util.dataloader import MyTestSetWrapper
 
 from model.mymodel import MyModel
 

@@ -10,7 +10,7 @@ import torch.nn as nn
 import torchvision.models as models
 
 # candidate_model 폴더 안에 있는 후보 모델 파일 import
-from .candidate_models import *
+from .candidate_models import candidate_models
  
 
 class MyModel(nn.Module):
