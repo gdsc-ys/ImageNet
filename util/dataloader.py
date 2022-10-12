@@ -16,13 +16,9 @@ from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 import torchvision.transforms as T
 
-DATA_TRAIN_PATH = os.path.join(
-   os.getcwd(), "data", "imagenette2-320"  
-)  # use 절대경로 for train data
-DATA_TEST_PATH = os.path.join(
-   os.getcwd(), "data", "imagenetwoof2-320"
-)  # use 절대경로 for test data
-MINI_BATCH_SIZE = 256  # numbers of images in a mini-batch
+DATA_TRAIN_PATH = os.path.join(os.getcwd(), "data", "imagenette2-320")  # use 절대경로 for train data
+DATA_TEST_PATH = os.path.join(os.getcwd(), "data", "imagenetwoof2-320")  # use 절대경로 for test data
+MINI_BATCH_SIZE = 128  # numbers of images in a mini-batch
 VALID_BATCH_SIZE = 64  # numbers of images in a mini-batch
 LEARNING_RATE = 1e-4
 EPOCHS = 100
@@ -118,7 +114,7 @@ class MyTrainSetWrapper(object):
         print("number of training data: ", len(train_data))
 
         train_loader = torch.utils.data.DataLoader(
-            dataset=train_data, batch_size=self.batch_size, shuffle=True
+            dataset=train_data, batch_size=MINI_BATCH_SIZE, shuffle=True
         )
 
         ## 입력 텐서를 직접 확인하고 싶은 경우, 이하를 실행함.
@@ -132,7 +128,7 @@ class MyTrainSetWrapper(object):
         print("number of test data: ", len(valid_data))
 
         valid_loader = torch.utils.data.DataLoader(
-            dataset=valid_data, batch_size=self.batch_size, shuffle=True
+            dataset=valid_data, batch_size=VALID_BATCH_SIZE, shuffle=True
         )
 
         print("\nValidation size: {}%".format(self.valid_size * 100))

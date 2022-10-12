@@ -8,12 +8,12 @@ train:
   batch_size: 4
   num_workers: 4
   valid_size: 0.3
-  train_path: "./data/train"
+  train_path: "./2_data/train"
 
 test:
   batch_size: 4
   num_workers: 4
-  test_path: "./data/val"
+  test_path: "./2_data/val"
 
 model:
-  base_model: "convnext_base"  
+  base_model: "convnext_base"
