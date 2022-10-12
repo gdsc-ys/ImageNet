@@ -40,7 +40,7 @@ cudnn.benchmark = True
 def _save_config_file(model_checkpoints_folder, model_name):
     if not os.path.exists(model_checkpoints_folder):
         os.makedirs(model_checkpoints_folder)
-    shutil.copy(
+    shutil.copy(        
         f"{CONFIG_PATH}" + model_name + ".yaml",
         os.path.join(model_checkpoints_folder, model_name + ".yaml"),
     )
