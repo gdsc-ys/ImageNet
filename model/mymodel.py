@@ -12,7 +12,7 @@ import torch.nn.functional as F
 
 # candidate_model 폴더 안에 있는 후보 모델 파일 import
 from .candidate_models import *
- 
+
 
 class MyModel(nn.Module):
     # 실험하고 싶은 model 종류가 여러가지 일 때, 유용한 클래스.
@@ -20,10 +20,10 @@ class MyModel(nn.Module):
     def __init__(self, base_model):
         super(MyModel, self).__init__()
         self.model_dict = {
-            'convnext_small' : models.convnext_small(pretrained=True),
-            'convnext_base' : models.convnext_base(pretrained=True),
-            'coca' : coca,
-            'resnet_50' : models.resnet50(pretrained=True),
+            "convnext_small": models.convnext_small(pretrained=True),
+            "convnext_base": models.convnext_base(pretrained=True),
+            # 'coca' : coca,
+            "resnet_50": models.resnet50(pretrained=True),
         }
 
         mymodel = self._get_basemodel(base_model)
@@ -56,6 +56,7 @@ class MyModel(nn.Module):
         return model
 
     def forward(self, x):
-        x = self.features(x)
-        x = self.fc(x)
-        return x
+        h = self.features(x)
+        # x = self.fc(x)
+        h = h.squeeze()
+        return h

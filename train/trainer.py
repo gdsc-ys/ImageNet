@@ -12,6 +12,7 @@ import torch.optim as optim
 
 import os
 import sys
+
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from datetime import datetime
 import shutil
@@ -40,7 +41,7 @@ cudnn.benchmark = True
 def _save_config_file(model_checkpoints_folder, model_name):
     if not os.path.exists(model_checkpoints_folder):
         os.makedirs(model_checkpoints_folder)
-    shutil.copy(        
+    shutil.copy(
         f"{CONFIG_PATH}" + model_name + ".yaml",
         os.path.join(model_checkpoints_folder, model_name + ".yaml"),
     )
@@ -69,7 +70,13 @@ class Trainer(object):
         self.config = config
         self.device = self._get_device()
         self.loss = nn.CrossEntropyLoss()
-        self.model_dict = {"mymodel": MyModel}
+        self.model_dict = {
+            "mymodel": MyModel,
+            "convnext_base": MyModel,
+            "convnext_base_1": MyModel,
+            "resnet_50": MyModel,
+            "resnet_50_batch256": MyModel,
+        }
 
     # cuda / cpu 선택
     def _get_device(self):
@@ -185,7 +192,9 @@ class Trainer(object):
 
         criterion = self.loss.to(self.device)
         ## optimizer = optim.Adam(model.parameters(), 3e-4) #, weight_decay=eval(self.config['weight_decay']))
-        optimizer = optim.SGD(model.parameters(), lr=self.config["learning_rate"], momentum=0.9)
+        optimizer = optim.SGD(
+            model.parameters(), lr=float(self.config["learning_rate"]), momentum=0.9
+        )
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
             optimizer, T_max=len(train_loader), eta_min=0, last_epoch=-1
         )
