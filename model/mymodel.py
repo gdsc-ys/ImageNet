@@ -3,13 +3,12 @@
 # @Filename : model
 # @Date : 2022-10-13
 # @Project : pytorch_basic
-# @Author : seungmin, watchstep
+# @Author : seungmin
 
 import torch.nn as nn
 import torchvision.models as models
 import torch.nn.functional as F
 
-from model.candidate_models.resnet_50 import ResNet50
 
 # candidate_model 폴더 안에 있는 후보 모델 파일 import
 from .candidate_models import *
@@ -28,6 +27,7 @@ class MyModel(nn.Module):
         }
 
         mymodel = self._get_basemodel(base_model)
+        mymodel = self.freeze_layer(mymodel) 
         self.features = nn.Sequential(*list(mymodel.children())[:-1])  # get all layers except the last layer
         '''
         https://github.com/mortezamg63/Accessing-and-modifying-different-layers-of-a-pretrained-model-in-pytorch/blob/master/README.md
@@ -44,6 +44,16 @@ class MyModel(nn.Module):
             return model
         except:
             raise ("Invalid model name. Check the config file.")
+        
+    def freeze_some_layers(self, model):
+        ct=0
+        num_layers = len(list(model.children()))
+        for child in model.childern():
+            ct +=1
+            if ct < (num_layers*.7):         # lower layers (layers의 70%)는 업데이트되지 않도록 freeze
+                for p in child.parameters():
+                    p.required_grad = False
+        return model
 
     def forward(self, x):
         x = self.features(x)
