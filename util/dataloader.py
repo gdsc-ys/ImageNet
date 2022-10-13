@@ -114,7 +114,7 @@ class MyTrainSetWrapper(object):
         print("number of training data: ", len(train_data))
 
         train_loader = torch.utils.data.DataLoader(
-            dataset=train_data, batch_size=MINI_BATCH_SIZE, shuffle=True
+            dataset=train_data, batch_size=self.batch_size, shuffle=True
         )
 
         ## 입력 텐서를 직접 확인하고 싶은 경우, 이하를 실행함.
@@ -128,7 +128,7 @@ class MyTrainSetWrapper(object):
         print("number of test data: ", len(valid_data))
 
         valid_loader = torch.utils.data.DataLoader(
-            dataset=valid_data, batch_size=VALID_BATCH_SIZE, shuffle=True
+            dataset=valid_data, batch_size=self.batch_size, shuffle=True
         )
 
         print("\nValidation size: {}%".format(self.valid_size * 100))

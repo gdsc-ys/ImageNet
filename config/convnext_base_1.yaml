@@ -1,17 +1,17 @@
 epochs: 10
 resume: None
-learning_rate: 0.001
+learning_rate: 4e-3
 weight_decay: 10e-6
 inference_device: "cuda"
 
 train:
-  batch_size: 4
+  batch_size: 16
   num_workers: 4
   valid_size: 0.3
   train_path: "./data/train"
 
 test:
-  batch_size: 4
+  batch_size: 16
   num_workers: 4
   test_path: "./data/val"
 
