@@ -6,13 +6,11 @@
 # @Author : seungmin
 
 import yaml # conda install PyYAML
-import os, sys
+import os
 from train.trainer import Trainer
 from util.dataloader import MyTrainSetWrapper
 
-CONFIG_PATH = os.path.join(
-    os.path.dirname(__file__), "..", "config/"
-)  # use relative directory path
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config/")  # use relative directory path
 
 def main(model_name):
     # yaml 로드

@@ -16,4 +16,4 @@ test:
   test_path: "./data/val"
 
 model:
-  base_model: "convnext_base"  
+  base_model: "resnet_50"
